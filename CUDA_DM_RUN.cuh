@@ -5,14 +5,15 @@
 #include <curand.h>
 #include <curand_kernel.h>   
 #include <vector>
-#include "CUDA_DM_Neuron.cuh"
+#include "CUDA_DM_NEURON.cuh"
+#include <cstdio>
 //#include "opengl_dis.h"
 //#include "kernel.cuh"
-#include "ogldev_math_3d.h"
+//#include "ogldev_math_3d.h"
 
-#include <boost/numeric/ublas/matrix.hpp>
+//#include <boost/numeric/ublas/matrix.hpp>
 
-
+/*
 struct Vertex
 {
     Vector3f pos;
@@ -40,6 +41,7 @@ struct Vertex
     }
 
 };
+*/
 
 struct s_xy_data
 {
@@ -76,6 +78,21 @@ void making_neuron_connection_list(std::vector<s_neuron_connection>& in_data, in
 struct s_neuronal_netowrk
 {
 
+    void save_spike_data(char *file_name)
+    {
+        FILE* file;
+
+        fopen_s(&file, file_name, "w");
+
+        for (int i = 0; i < this->out_data.size(); i++)
+        {
+            fprintf(file, "%d %d\n", out_data[i].x, out_data[i].y);
+        }
+
+        fclose(file);
+        return;
+    }
+
     std::vector<double> out_ca_data;// (nn* ca_ll, 0.0);
     double *p_ca_data;
     int* p_stim_number;
@@ -99,11 +116,11 @@ struct s_neuronal_netowrk
         this->all_clear();
     }
 
-    std::vector<Vertex> _neuronal_xyz;
+    //std::vector<Vertex> _neuronal_xyz;
     std::vector<s_neuron_connection> _connect_data;
     std::vector<cuda_s_izkevich> _neuron_data;
 
-    std::vector<Vertex> spike_color;
+    //std::vector<Vertex> spike_color;
 
 
     std::vector<int> stimulus_neuron_number;
@@ -139,7 +156,7 @@ struct s_neuronal_netowrk
     int r_ft = 0;
     void all_clear()
     {
-        this->_neuronal_xyz.clear();
+        //this->_neuronal_xyz.clear();
         this->_connect_data.clear();
         this->_neuron_data.clear();
 
@@ -219,11 +236,13 @@ struct s_neuronal_netowrk
 
     void set_neuron_xyz(int nn, float x, float y, float z, float r, float g, float b)
     {
-        this->_neuronal_xyz[nn] = Vertex(x, y, z, 0.1f, 0.1f, 0.1f);
 
-        this->spike_color[nn].color.r = r;
-        this->spike_color[nn].color.g = g;
-        this->spike_color[nn].color.b = b;
+       // this->_neuronal_xyz[nn] = Vertex(x, y, z, 0.1f, 0.1f, 0.1f);
+
+        //this->spike_color[nn].color.r = r;
+        //this->spike_color[nn].color.g = g;
+        //this->spike_color[nn].color.b = b;
+
 
     }
 
@@ -232,8 +251,7 @@ struct s_neuronal_netowrk
         return "MONET SNN DM VERSION 1.2 2023.04.07";
     }
 
-
-   
+       
 
     void set_run_param(double dt, int st, int ft, double noise_intensity, bool r_record, bool r_stdp, bool r_stim)
     {
@@ -251,8 +269,6 @@ struct s_neuronal_netowrk
 
 
 
-   
-    
     void   cuda_run_stdp()
     {
         this->stim_time = 0;
@@ -261,6 +277,8 @@ struct s_neuronal_netowrk
     }
     
     void create_cuda_memory();
+
+
 };
 
 

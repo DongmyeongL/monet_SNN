@@ -1,5 +1,7 @@
 #include "CUDA_DM_NEURON.cuh"
 
+
+
 /*
 	__device__  double cuda_s_izkevich::fun_v()
 	{

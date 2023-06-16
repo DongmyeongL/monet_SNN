@@ -1,10 +1,10 @@
 #include "CUDA_DM_RUN.cuh"
 
 #include <cstdio>
-#include <boost/thread.hpp>
+//#include <boost/thread.hpp>
 #include <random>
 #include <iostream>
-#include <boost/atomic.hpp>
+//#include <boost/atomic.hpp>
 #include <array>
 #include <cuda_fp16.h>
 
@@ -16,7 +16,6 @@ __global__ void setup_rand(curandState* state, int seed, int size)
     if (tid < size)
         curand_init(seed + tid, tid, 0, &state[tid]);
 }
-
 
 
 
@@ -44,36 +43,26 @@ void s_neuronal_netowrk::create_cuda_memory()
         }
     }
   
-    // std::vector<int> stimulus_neuron_number;
-   // std::vector<std::vector<double>> stimulus_data;
+    //std::vector<int> stimulus_neuron_number;
+    //std::vector<std::vector<double>> stimulus_data;
  
-
-
-
-
-
     cudaMalloc((void**)&p_nn, v_nn.size() * sizeof(int));
     cudaMalloc((void**)&p_pred_id, v_pred_id.size() * sizeof(int));
     cudaMalloc((void**)&p_weight, v_weight.size() * sizeof(double));
 
 
-//    cudaMemcpy(this->p_stim_number, (void*)&this->stimulus_neuron_number[0], stim_number * sizeof(int), cudaMemcpyHostToDevice);
-  //  cudaMemcpy(this->p_stim_data, (void*)&t_data[0], stim_length * stim_number *  sizeof(double),cudaMemcpyHostToDevice);
+    //cudaMemcpy(this->p_stim_number, (void*)&this->stimulus_neuron_number[0], stim_number * sizeof(int), cudaMemcpyHostToDevice);
+    //cudaMemcpy(this->p_stim_data, (void*)&t_data[0], stim_length * stim_number *  sizeof(double),cudaMemcpyHostToDevice);
 
-
-  //  std::vector<int> stimulus_neuron_number;
-   // std::vector<std::vector<double>> stimulus_data;
-
+    //std::vector<int> stimulus_neuron_number;
+    //std::vector<std::vector<double>> stimulus_data;
 
     cudaMemcpy(this->c_neuron, (void*)&this->_neuron_data[0], this->nn_neuron_num * sizeof(cuda_s_izkevich), cudaMemcpyHostToDevice);
     cudaMemcpy(p_nn, (void*)&v_nn[0], v_nn.size() * sizeof(int), cudaMemcpyHostToDevice);
     cudaMemcpy(p_pred_id, (void*)&v_pred_id[0], v_pred_id.size() * sizeof(int), cudaMemcpyHostToDevice);
     cudaMemcpy(p_weight, (void*)&v_weight[0], v_weight.size() * sizeof(double), cudaMemcpyHostToDevice);
 
-
 }
-
-
 
 
 void s_neuronal_netowrk::set_neuron_number(int nn)
@@ -82,8 +71,8 @@ void s_neuronal_netowrk::set_neuron_number(int nn)
     this->nn_neuron_num = nn;
     this->_neuron_data.resize(nn);
     this->_connect_data.resize(nn);
-    this->_neuronal_xyz.resize(nn);
-    this->spike_color.resize(nn);
+   // this->_neuronal_xyz.resize(nn);
+   // this->spike_color.resize(nn);
 
     cudaMalloc((void**)&this->c_neuron, nn * sizeof(cuda_s_izkevich));
     cudaMalloc((void**)&this->devStates, nn * sizeof(curandState));
@@ -276,7 +265,6 @@ __global__ void cuda_fun_connect_update(cuda_s_izkevich* v_neuron, curandState* 
 
 }
 
-
 __global__ void cuda_fun_stim_update(cuda_s_izkevich* v_neuron, int size, int stim_time,int real_time, int* p_stim_number, double* p_stim_data, int stim_number, int stim_length)
 {
     int tid = blockIdx.x * blockDim.x + threadIdx.x;
@@ -295,6 +283,8 @@ __global__ void cuda_fun_stim_update(cuda_s_izkevich* v_neuron, int size, int st
             }
     }
 }
+
+
 __global__ void cuda_fun_ca_save(cuda_s_izkevich* v_neuron, double *p_ca_data, int time_data,int ca_ll ,int size)
 {
     int tid = blockIdx.x * blockDim.x + threadIdx.x;
@@ -304,6 +294,8 @@ __global__ void cuda_fun_ca_save(cuda_s_izkevich* v_neuron, double *p_ca_data, i
         p_ca_data[time_data * size + tid] = v_neuron[tid].calcium;
     }
 }
+
+
 
 __global__ void cuda_fun_update(cuda_s_izkevich* v_neuron, curandState* state, double noise_intensity, double dt, int time_step, int size)
 {
@@ -373,6 +365,8 @@ void making_neuron_connection_list(std::vector<s_neuron_connection>& in_data, in
     }
 
 }
+
+
 /*
 void GPU_test_ca(int nn, double dt, int st, int ft, double nois_intensity, std::vector<cuda_s_izkevich>& t_neuron, std::vector<s_neuron_connection>& connect_data,  std::vector<int>& ca_in_number, std::vector<std::vector<double>>& ca_out_data ,int ca_dd)
 {
@@ -478,22 +472,20 @@ void GPU_test_ca(int nn, double dt, int st, int ft, double nois_intensity, std::
 
 void GPU_STDP_stimulus_test(s_neuronal_netowrk* nn_data)
 {
+
     int nn = nn_data->nn_neuron_num;
     int n_thread = 500;
     int n_block = (int)(nn / n_thread) + 1;
 
-
-    
+       
    
     if (nn_data->calcium_recording == true)
     {
-        
          nn_data->ca_ll = (nn_data->run_param.ft - nn_data->run_param.st) / nn_data->calcium_dd;
-        
+       
          cudaMalloc((void**)&nn_data->p_ca_data, nn *nn_data->ca_ll* sizeof(double));
         //nn_data->out_ca_data.resize(nn_data->nn_neuron_num, ll, false);
-        
-       
+           
     }
 
 
@@ -502,13 +494,10 @@ void GPU_STDP_stimulus_test(s_neuronal_netowrk* nn_data)
     for (int i = nn_data->run_param.st; i < nn_data->run_param.ft; i++)
     {
 
-
         if (nn_data->run_param.spiking_time_record == true)
         {
             cudaMemcpy((void*)&nn_data->_neuron_data[0], (void*)&nn_data->c_neuron[0], nn * sizeof(cuda_s_izkevich), cudaMemcpyDeviceToHost);
             cudaDeviceSynchronize();
-
-
 
             for (int ii = 0; ii < nn; ii++)
             {
@@ -521,20 +510,16 @@ void GPU_STDP_stimulus_test(s_neuronal_netowrk* nn_data)
                     nn_data->out_data.push_back(t);
                 }
             }
+
         }
 
         if (nn_data->calcium_recording == true)
         {
-
-
-
             //__global__ void cuda_fun_ca_save(cuda_s_izkevich* v_neuron, double* p_ca_data, int time_data, int ca_ll, int size)
             if (i % nn_data->calcium_dd == 0)
             {
                 cuda_fun_ca_save << <n_block, n_thread >> > (nn_data->c_neuron, nn_data->p_ca_data, ca_count, nn_data->ca_ll, nn);
                 //cuda_s_izkevich* v_neuron, double* p_ca_data, int time_data, int size)
-
-
                 ca_count++;
             }
             //if (i % nn_data->calcium_dd == 0)
@@ -582,17 +567,10 @@ void GPU_STDP_stimulus_test(s_neuronal_netowrk* nn_data)
             
         if (nn_data->run_param.run_stdp == true)
         {
-
             cuda_fun_stdp_update << <n_block, n_thread >> > (nn_data->c_neuron, nn_data->devStates, nn_data->p_nn, nn_data->p_pred_id, nn_data->p_weight,nn, i, nn_data->stdp_param);
             cudaDeviceSynchronize();
-
-            //if ((i + 1) % 699 == 0)
-            {
-              //  cuda_fun_synaptic_update << <n_block, n_thread >> > (nn_data->c_neuron, nn_data->devStates, nn_data->p_nn, nn_data->p_pred_id, nn_data->p_weight, nn, i, nn_data->stdp_param);
-                //cudaDeviceSynchronize();
-            }
-
         }
+
 
     }
 
@@ -602,7 +580,6 @@ void GPU_STDP_stimulus_test(s_neuronal_netowrk* nn_data)
         nn_data->out_ca_data.clear(); 
         nn_data->out_ca_data.resize(nn* nn_data->ca_ll, 0.0);
         cudaMemcpy((void*)&nn_data->out_ca_data[0], (void*)&nn_data->p_ca_data[0], nn *nn_data->ca_ll*sizeof(double), cudaMemcpyDeviceToHost);
-
     }
 
 
